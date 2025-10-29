@@ -1,0 +1,85 @@
+/* --- Custom Game Styles --- */
+
+/* Style for the trash/recycling items */
+.game-item {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    font-size: 32px;
+    text-align: center;
+    line-height: 40px;
+    cursor: grab;
+    user-select: none;
+    /* Smooth transition for movement */
+    transition: transform 0.1s ease-out;
+}
+
+/* Style when an item is being dragged */
+.game-item.dragging {
+    cursor: grabbing;
+    transform: scale(1.15); /* Make it slightly larger */
+    z-index: 100;
+    opacity: 0.8;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+/* Style for the bins */
+.game-bin {
+    transition: all 0.2s ease-in-out;
+    border: 3px dashed transparent;
+}
+
+/* Style for a bin when a valid item is hovering over it */
+.game-bin.hover-valid {
+    transform: scale(1.05);
+    border-color: #22c55e; /* green-500 */
+    box-shadow: 0 0 20px 5px rgba(34, 197, 94, 0.7); /* Green glow */
+}
+
+/* Style for a bin when an invalid item is hovering */
+.game-bin.hover-invalid {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px 5px rgba(244, 67, 54, 0.7); /* Red glow */
+}
+
+/* --- Quiz Game CSS --- */
+.quiz-answer-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb; /* gray-200 */
+    background-color: #ffffff; /* white */
+    border-radius: 0.5rem; /* rounded-lg */
+    text-align: left;
+    font-weight: 500; /* medium */
+    color: #111827; /* gray-900 */
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.quiz-answer-btn:not(:disabled):hover {
+    border-color: #3b82f6; /* blue-500 */
+    background-color: #eff6ff; /* blue-50 */
+}
+
+.quiz-answer-btn.quiz-correct {
+    background-color: #d1fae5; /* green-100 */
+    border-color: #10b981; /* green-500 */
+    color: #065f46; /* green-800 */
+}
+
+.quiz-answer-btn.quiz-incorrect {
+    background-color: #fee2e2; /* red-100 */
+    border-color: #ef4444; /* red-500 */
+    color: #991b1b; /* red-800 */
+}
+
+.quiz-answer-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.quiz-answer-btn.quiz-selected {
+    border-width: 3px;
+    border-color: #3b82f6; /* blue-500 */
+}
+

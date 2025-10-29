@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicQuest</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load custom styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-blue-600">
+                Civic<span class="text-green-500">Quest</span>
+            </div>
+            
+            <!-- Main Nav (for logged-in users) -->
+            <div id="main-nav" class="hidden">
+                <ul class="flex items-center space-x-4">
+                    <li><a href="#report" data-view="report" class="nav-link font-medium text-gray-700 hover:text-blue-600 pb-2 border-b-2 border-transparent">Report Issue</a></li>
+                    <li><a href="#feed" data-view="feed" class="nav-link font-medium text-gray-700 hover:text-blue-600 pb-2 border-b-2 border-transparent">Issue Feed</a></li>
+                    <li><a href="#games" data-view="games" class="nav-link font-medium text-gray-700 hover:text-blue-600 pb-2 border-b-2 border-transparent">Games</a></li>
+                    <li><a href="#leaderboard" data-view="leaderboard" class="nav-link font-medium text-gray-700 hover:text-blue-600 pb-2 border-b-2 border-transparent">Leaderboard</a></li>
+                    <li class="relative group">
+                        <span id="nav-username" class="font-medium text-blue-600 cursor-pointer"></span>
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20 hidden group-hover:block">
+                            <span class="block px-4 py-2 text-sm text-gray-700">High Score: <strong id="nav-highscore">0</strong></span>
+                            <a href="#" id="logout-button" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Auth Nav (for logged-out users) -->
+            <div id="auth-nav">
+                <ul class="flex items-center space-x-2">
+                    <li><a href="#login" id="nav-login" data-view="login" class="nav-link text-gray-700 font-medium hover:text-blue-600 px-4 py-2 rounded-md">Login</a></li>
+                    <li><a href="#signup" id="nav-signup" data-view="signup" class="nav-link bg-blue-600 text-white font-medium px-4 py-2 rounded-md hover:bg-blue-700">Sign Up</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto p-6">
+        
+        <!-- Loading Spinner (initially hidden) -->
+        <div id="loading-spinner" class="hidden text-center p-12">
+            <div class="inline-block w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-gray-600 mt-4">Loading...</p>
+        </div>
+
+        <!-- App Content (initially hidden) -->
+        <div id="app-content" class="hidden">
+            <!-- View 1: Report Issue -->
+            <div id="view-report" class="hidden">
+                <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-xl">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Report a Civic Issue</h2>
+                    <form id="report-form" class="space-y-6">
+                        <div>
+                            <label for="issue-type" class="block text-sm font-medium text-gray-700 mb-1">Type of Issue</label>
+                            <select id="issue-type" name="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option>Pothole</option>
+                                <option>Broken Streetlight</option>
+                                <option>Graffiti</option>
+                                <option>Illegal Dumping</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="issue-location" class="block text-sm font-medium text-gray-700 mb-1">Location / Address</label>
+                            <input type="text" id="issue-location" name="location" placeholder="e.g., Corner of Main St & 1st Ave" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+
+                        <div>
+                            <label for="issue-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea id="issue-description" name="description" rows="4" placeholder="Describe the issue in more detail..." class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required></textarea>
+                        </div>
+                        
+                        <!-- Simple "Photo URL" input for demo purposes -->
+                        <div>
+                            <label for="issue-photo" class="block text-sm font-medium text-gray-700 mb-1">Photo URL (Optional)</label>
+                            <input type="text" id="issue-photo" name="photoUrl" placeholder="https://example.com/image.png" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div id="form-message" class="text-center p-3 rounded-lg hidden"></div>
+
+                        <div>
+                            <button type="submit" id="report-submit-button" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300">
+                                Submit Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- View 2: Issue Feed -->
+            <div id="view-feed" class="hidden">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Real-Time Issue Feed</h2>
+                <div id="issue-feed-container" class="space-y-6">
+                    <!-- Issues will be loaded here by JavaScript -->
+                    <p class="text-gray-500 text-center">Loading issues...</p>
+                </div>
+            </div>
+
+            <!-- View 3: Awareness Games -->
+            <div id="view-games" class="hidden">
+                <div class="max-w-4xl mx-auto">
+                    <!-- Game 1: Clean-Up Champion -->
+                    <div class="bg-white p-6 rounded-xl shadow-xl mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 text-center mb-4">Clean-Up Champion</h3>
+                        <!-- Game Area -->
+                        <div id="game-area" class="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden border-4 border-gray-200 shadow-inner">
+                            <!-- Items will be spawned here -->
+                        </div>
+                        
+                        <!-- Game UI -->
+                        <div class="flex justify-between items-center mt-4">
+                            <button id="game-start-button" class="bg-blue-600 text-white font-bold py-2 px-5 rounded-lg shadow-md hover:bg-blue-700 transition-all">Start Game</button>
+                            <div class="text-lg">
+                                <span class="font-medium text-gray-600">Score:</span>
+                                <span id="game-score" class="font-bold text-gray-900">0</span>
+                            </div>
+                            <div class="text-lg">
+                                <span class="font-medium text-gray-600">Time:</span>
+                                <span id="game-timer" class="font-bold text-gray-900">30</span>s
+                            </div>
+                        </div>
+
+                        <!-- Bins -->
+                        <div class="grid grid-cols-3 gap-4 mt-4">
+                            <div id="bin-compost" data-type="compost" class="game-bin bg-green-200 text-green-800 p-4 rounded-lg text-center shadow-md">
+                                <span class="text-2xl">🍎</span>
+                                <span class="block font-bold">COMPOST</span>
+                            </div>
+                            <div id="bin-trash" data-type="trash" class="game-bin bg-gray-200 text-gray-800 p-4 rounded-lg text-center shadow-md">
+                                <span class="text-2xl"> wrappers_</span>
+                                <span class="block font-bold">TRASH</span>
+                            </div>
+                            <div id="bin-recycling" data-type="recycling" class="game-bin bg-blue-200 text-blue-800 p-4 rounded-lg text-center shadow-md">
+                                <span class="text-2xl">🍾</span>
+                                <span class="block font-bold">RECYCLING</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Game 2: Community Helper Quiz -->
+                    <div class="mt-12 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-xl">
+                        <h3 class="text-2xl font-bold text-gray-800 text-center mb-4">Community Helper Quiz</h3>
+                        
+                        <div id="quiz-container" class="max-w-xl mx-auto">
+                            <div id="quiz-start-screen" class="text-center">
+                                <p class="text-gray-600 mb-4">Test your civic knowledge! What would you do?</p>
+                                <button id="quiz-start-button" class="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-green-700 transition-all duration-300">
+                                    Start Quiz
+                                </button>
+                            </div>
+                            
+                            <div id="quiz-game-screen" class="hidden">
+                                <div class="flex flex-wrap justify-between items-center mb-4">
+                                    <h4 class="text-lg font-semibold mb-2 sm:mb-0">Question <span id="quiz-question-number">1</span>/<span id="quiz-total-questions">0</span></h4>
+                                    <div class="text-right">
+                                        <span class="text-sm font-medium text-gray-600">SCORE</span>
+                                        <span id="quiz-score" class="text-2xl font-bold text-green-700 block">0</span>
+                                    </div>
+                                </div>
+                                
+                                <div id="quiz-question" class="text-lg font-medium text-gray-900 mb-4 p-4 bg-white rounded-lg border">
+                                    <!-- Question text goes here -->
+                                </div>
+                                
+                                <div id="quiz-answers" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <!-- Answer buttons go here -->
+                                </div>
+                                
+                                <div id="quiz-feedback" class="mt-4 p-3 rounded-lg text-center font-medium hidden">
+                                    <!-- Feedback text goes here -->
+                                </div>
+                                
+                                <button id="quiz-next-button" class="hidden w-full mt-4 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300">
+                                    Next Question
+                                </button>
+                            </div>
+
+                            <div id="quiz-end-screen" class="hidden text-center">
+                                <h4 class="text-2xl font-bold text-gray-900 mb-2">Quiz Complete!</h4>
+                                <p class="text-lg text-gray-700 mb-4">Your final score is <strong id="quiz-final-score" class="text-green-700">0</strong>.</p>
+                                <p id="quiz-final-message" class="text-gray-600 mb-6"></p>
+                                <button id="quiz-restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300">
+                                    Play Again
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View 4: Leaderboard -->
+            <div id="view-leaderboard" class="hidden">
+                 <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-xl">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Community Leaderboard</h2>
+                    <p class="text-gray-600 text-center mb-6">See which users are making the biggest impact! This leaderboard shows the top 10 players by game high score.</p>
+                    
+                    <div id="leaderboard-list-container" class="space-y-4">
+                        <!-- Leaderboard will be dynamically loaded here -->
+                        <p class="text-gray-500 text-center">Loading leaderboard...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- View 5: Login -->
+            <div id="view-login" class="hidden">
+                <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-xl">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Login</h2>
+                    <form id="login-form" class="space-y-6">
+                        <div>
+                            <label for="login-username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                            <input type="text" id="login-username" name="username" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="login-password" name="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        
+                        <div id="login-message" class="text-center p-3 rounded-lg hidden"></div>
+                        
+                        <div>
+                            <button type="submit" id="login-submit-button" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700">
+                                Login
+                            </button>
+                        </div>
+                    </form>
+                    <p class="text-center text-gray-600 mt-6">
+                        Don't have an account? <a href="#signup" data-view="signup" class="nav-link font-medium text-blue-600 hover:underline">Sign Up</a>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- View 6: Signup -->
+            <div id="view-signup" class="hidden">
+                <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-xl">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Create Account</h2>
+                    <form id="signup-form" class="space-y-6">
+                        <div>
+                            <label for="signup-username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                            <input type="text" id="signup-username" name="username" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="signup-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="signup-password" name="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        
+                        <div id="signup-message" class="text-center p-3 rounded-lg hidden"></div>
+                        
+                        <div>
+                            <button type="submit" id="signup-submit-button" class="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-green-700">
+                                Create Account
+                            </button>
+                        </div>
+                    </form>
+                    <p class="text-center text-gray-600 mt-6">
+                        Already have an account? <a href="#login" data-view="login" class="nav-link font-medium text-blue-600 hover:underline">Login</a>
+                    </p>
+                </div>
+            </div>
+
+        </div> <!-- /#app-content -->
+    </main>
+
+    <!-- Load custom JavaScript (MUST be at the end) -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
+
